@@ -1,0 +1,54 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: 220 33% 98%;
+  --foreground: 222 45% 11%;
+  --card: 0 0% 100%;
+  --card-foreground: 222 45% 11%;
+  --primary: 226 80% 56%;
+  --primary-foreground: 210 40% 98%;
+  --muted: 220 24% 95%;
+  --muted-foreground: 220 9% 40%;
+  --border: 220 20% 88%;
+  --input: 220 20% 88%;
+  --ring: 226 80% 56%;
+  --success: 145 66% 42%;
+  --warning: 35 95% 50%;
+  --destructive: 0 84% 60%;
+  --radius: 0.9rem;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-size: 15px;
+  }
+}
+
+@layer components {
+  .text-muted {
+    @apply text-muted-foreground;
+  }
+
+  .card-muted {
+    @apply bg-muted/40 border border-border;
+  }
+
+  .ring-focus {
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2;
+  }
+
+  .crm-kpi-card {
+    @apply rounded-2xl border bg-card p-4 shadow-soft;
+  }
+
+  .crm-table-zebra tbody tr:nth-child(odd) {
+    @apply bg-muted/20;
+  }
+}
