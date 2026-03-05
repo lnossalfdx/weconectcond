@@ -1,7 +1,7 @@
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Building2, Lock, Mail, ShieldCheck, Sparkles, TrendingUp } from 'lucide-react';
+import { Building2, Lock, Mail, ShieldCheck, TrendingUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -35,7 +35,7 @@ export function LoginPage() {
       <div className="relative mx-auto grid min-h-screen max-w-7xl items-center gap-8 px-4 py-10 lg:grid-cols-2">
         <section className="space-y-6">
           <div className="inline-flex items-center gap-2 rounded-full border border-slate-700 bg-slate-900/70 px-3 py-1 text-xs">
-            <Sparkles className="h-3.5 w-3.5 text-indigo-300" />
+            <img src="/logo.png" alt="weconect" className="h-4 w-4 rounded-sm object-cover" />
             weconect CRM para Condomínios
           </div>
 
@@ -68,9 +68,12 @@ export function LoginPage() {
         </section>
 
         <section>
-          <Card className="border-slate-800 bg-slate-900/80 shadow-2xl">
-            <CardHeader>
-              <CardTitle className="text-xl">Entrar no weconect</CardTitle>
+            <Card className="border-slate-800 bg-slate-900/80 shadow-2xl">
+              <CardHeader>
+                <div className="mb-2">
+                  <img src="/logo.png" alt="Logo weconect" className="h-10 w-10 rounded-lg object-cover" />
+                </div>
+                <CardTitle className="text-xl">Entrar no weconect</CardTitle>
               <p className="text-sm text-slate-400">Use sua conta para acessar o painel.</p>
               {isFrontOnly && (
                 <div className="rounded-lg border border-amber-400/40 bg-amber-400/10 px-3 py-2 text-xs text-amber-200">

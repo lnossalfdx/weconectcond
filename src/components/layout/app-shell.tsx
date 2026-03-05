@@ -30,8 +30,9 @@ export function AppShell() {
     <div className="min-h-screen bg-background">
       <aside className={`fixed left-0 top-0 h-screen border-r bg-slate-950 text-slate-100 transition-all ${collapsed ? 'w-[84px]' : 'w-[250px]'}`}>
         <div className="flex h-14 items-center justify-between border-b border-slate-800 px-3">
-          <Link to="/app/dashboard" className={`font-semibold tracking-tight ${collapsed ? 'text-xs' : 'text-sm'}`}>
-            {collapsed ? 'WEC' : 'weconect'}
+          <Link to="/app/dashboard" className="flex items-center gap-2">
+            <img src="/logo.png" alt="weconect" className={`rounded-md object-cover ${collapsed ? 'h-7 w-7' : 'h-8 w-8'}`} />
+            {!collapsed && <span className="text-sm font-semibold tracking-tight">weconect</span>}
           </Link>
           <Button variant="ghost" size="icon" className="text-slate-100 hover:bg-slate-800" onClick={() => setCollapsed((v) => !v)}>
             {collapsed ? <PanelLeftOpen className="h-4 w-4" /> : <PanelLeftClose className="h-4 w-4" />}
