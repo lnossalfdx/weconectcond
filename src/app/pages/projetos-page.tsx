@@ -188,7 +188,7 @@ export function ProjetosPage() {
                       ))}
                     </SelectContent>
                   </Select>
-                  <div className="grid grid-cols-2 gap-2">
+                  <div className="grid gap-2 sm:grid-cols-2">
                     <Select value={newProjectStatus} onValueChange={(v) => setNewProjectStatus(v as (typeof PROJECT_STATUS)[number])}>
                       <SelectTrigger><SelectValue /></SelectTrigger>
                       <SelectContent>
@@ -260,7 +260,7 @@ export function ProjetosPage() {
               <span>Detalhes do projeto</span>
               {selectedProject && canWrite && (
                 <Select value={selectedProject.status} onValueChange={(v) => projectStatusMutation.mutate({ id: selectedProject.id, status: v })}>
-                  <SelectTrigger className="h-8 w-[160px]"><SelectValue /></SelectTrigger>
+                  <SelectTrigger className="h-8 w-full sm:w-[160px]"><SelectValue /></SelectTrigger>
                   <SelectContent>{PROJECT_STATUS.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
                 </Select>
               )}
@@ -324,7 +324,7 @@ export function ProjetosPage() {
                             <TableCell>
                               {canWrite ? (
                                 <Select value={task.status} onValueChange={(v) => taskUpdateMutation.mutate({ id: task.id, payload: { status: v } })}>
-                                  <SelectTrigger className="h-8 w-[150px]"><SelectValue /></SelectTrigger>
+                                  <SelectTrigger className="h-8 w-full sm:w-[150px]"><SelectValue /></SelectTrigger>
                                   <SelectContent>{TASK_STATUS.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
                                 </Select>
                               ) : (
@@ -337,7 +337,7 @@ export function ProjetosPage() {
                                   value={task.assigned_to ?? NO_ASSIGNEE}
                                   onValueChange={(v) => taskUpdateMutation.mutate({ id: task.id, payload: { assigned_to: v === NO_ASSIGNEE ? null : v } })}
                                 >
-                                  <SelectTrigger className="h-8 w-[170px]"><SelectValue placeholder="Responsável" /></SelectTrigger>
+                                  <SelectTrigger className="h-8 w-full sm:w-[170px]"><SelectValue placeholder="Responsável" /></SelectTrigger>
                                   <SelectContent>
                                     <SelectItem value={NO_ASSIGNEE}>Sem responsável</SelectItem>
                                     {(usersQuery.data ?? []).map((u) => <SelectItem key={u.user_id} value={u.user_id}>{u.full_name}</SelectItem>)}
@@ -347,7 +347,7 @@ export function ProjetosPage() {
                             </TableCell>
                             <TableCell>
                               {canWrite ? (
-                                <Input className="h-8 w-[145px]" type="date" value={task.due_date ?? ''} onChange={(e) => taskUpdateMutation.mutate({ id: task.id, payload: { due_date: e.target.value || null } })} />
+                                <Input className="h-8 w-full sm:w-[145px]" type="date" value={task.due_date ?? ''} onChange={(e) => taskUpdateMutation.mutate({ id: task.id, payload: { due_date: e.target.value || null } })} />
                               ) : (task.due_date ? dateFormat.format(new Date(task.due_date)) : '-')}
                             </TableCell>
                             <TableCell className="text-right">

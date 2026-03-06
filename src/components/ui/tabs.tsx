@@ -4,7 +4,7 @@ import { cn } from '@/lib/utils';
 export const Tabs = TabsPrimitive.Root;
 
 export function TabsList({ className, ...props }: TabsPrimitive.TabsListProps) {
-  return <TabsPrimitive.List className={cn('inline-flex h-10 items-center justify-center rounded-lg bg-muted p-1', className)} {...props} />;
+  return <TabsPrimitive.List className={cn('crm-tabs-list inline-flex h-10 items-center justify-center rounded-lg bg-muted p-1', className)} {...props} />;
 }
 
 export function TabsTrigger({ className, ...props }: TabsPrimitive.TabsTriggerProps) {

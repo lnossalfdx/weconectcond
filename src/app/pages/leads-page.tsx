@@ -276,7 +276,7 @@ export function LeadsPage() {
                 <TableCell>
                   {can(role, 'write', 'leads') ? (
                     <Select value={lead.stage_id ?? 'none'} onValueChange={(v) => v !== 'none' && stageMutation.mutate({ id: lead.id, stage_id: v })}>
-                      <SelectTrigger className="h-8 w-[150px]"><SelectValue placeholder="Sem estágio" /></SelectTrigger>
+                      <SelectTrigger className="h-8 w-full sm:w-[150px]"><SelectValue placeholder="Sem estágio" /></SelectTrigger>
                       <SelectContent>
                         <SelectItem value="none">Sem estágio</SelectItem>
                         {(stagesQuery.data ?? []).map((s: any) => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}
@@ -287,7 +287,7 @@ export function LeadsPage() {
                 <TableCell>
                   {can(role, 'write', 'leads') ? (
                     <Select value={lead.status ?? 'novo'} onValueChange={(v) => statusMutation.mutate({ id: lead.id, status: v })}>
-                      <SelectTrigger className="h-8 w-[140px]"><SelectValue /></SelectTrigger>
+                      <SelectTrigger className="h-8 w-full sm:w-[140px]"><SelectValue /></SelectTrigger>
                       <SelectContent>{STATUS_OPTIONS.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
                     </Select>
                   ) : (lead.status ?? '-')}
@@ -366,11 +366,11 @@ export function LeadsPage() {
             <Input placeholder="Nome" {...form.register('name')} />
             <Input placeholder="Email" {...form.register('email')} />
             <Input placeholder="Telefone" {...form.register('phone')} />
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid gap-2 sm:grid-cols-2">
               <Input placeholder="Origem" {...form.register('source')} />
               <Input placeholder="Unidades estimadas" type="number" {...form.register('units_hint')} />
             </div>
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid gap-2 sm:grid-cols-2">
               <Select value={form.watch('status') ?? 'novo'} onValueChange={(v) => form.setValue('status', v)}>
                 <SelectTrigger><SelectValue placeholder="Status" /></SelectTrigger>
                 <SelectContent>{STATUS_OPTIONS.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
@@ -386,7 +386,7 @@ export function LeadsPage() {
                 </SelectContent>
               </Select>
             </div>
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid gap-2 sm:grid-cols-2">
               <Select value={form.watch('stage_id') ?? 'none'} onValueChange={(v) => form.setValue('stage_id', v === 'none' ? undefined : v)}>
                 <SelectTrigger><SelectValue placeholder="Estágio" /></SelectTrigger>
                 <SelectContent>

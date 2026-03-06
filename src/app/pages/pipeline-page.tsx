@@ -74,7 +74,7 @@ function LeadCard({
         <p>Atualizado: {lead.updated_at ? dateFormat.format(new Date(lead.updated_at)) : '-'}</p>
       </div>
 
-      <div className="grid grid-cols-2 gap-2">
+      <div className="grid gap-2 sm:grid-cols-2">
         <Button size="sm" variant="outline" asChild>
           <Link to={`/app/leads/${lead.id}`}>Abrir</Link>
         </Button>
@@ -261,7 +261,7 @@ export function PipelinePage() {
         <div className="grid gap-3 md:grid-cols-4">
           {stageSummary.map(({ stage, list, scoreAvg, potentialUnits }) => (
             <StageDropZone key={stage.id} stageId={stage.id}>
-              <Card id={stage.id} className="h-[74vh] overflow-auto bg-muted/30">
+              <Card id={stage.id} className="h-[65vh] overflow-auto bg-muted/30 md:h-[74vh]">
                 <CardHeader className="sticky top-0 z-10 border-b bg-card/90 backdrop-blur">
                   <CardTitle className="space-y-2 text-sm">
                     <div className="flex items-center justify-between">
@@ -294,7 +294,7 @@ export function PipelinePage() {
 
         <DragOverlay>
           {activeLead ? (
-            <div className="z-[9999] w-[320px] rounded-xl border bg-card p-3 shadow-2xl ring-2 ring-primary/30">
+            <div className="z-[9999] w-[280px] rounded-xl border bg-card p-3 shadow-2xl ring-2 ring-primary/30 sm:w-[320px]">
               <p className="text-sm font-semibold">{activeLead.name}</p>
               <p className="text-xs text-muted-foreground">{activeLead.email || activeLead.phone || 'Sem contato'}</p>
               <div className="mt-2 flex gap-1">

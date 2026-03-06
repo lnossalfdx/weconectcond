@@ -10,7 +10,7 @@ import { useAuth } from '@/features/auth/auth-context';
 import { toast } from 'sonner';
 import { changePassword } from '@/features/auth/api';
 
-export function Topbar() {
+export function Topbar({ mobileNavTrigger }: { mobileNavTrigger?: React.ReactNode }) {
   const { profile } = useAuth();
   const [q, setQ] = useState('');
 
@@ -44,13 +44,15 @@ export function Topbar() {
   const results = useMemo(() => searchQuery.data, [searchQuery.data]);
 
   return (
-    <header className="sticky top-0 z-20 border-b bg-background/90 px-4 py-3 backdrop-blur">
-      <div className="flex items-center gap-3">
-        <div className="relative max-w-xl flex-1">
+    <header className="sticky top-0 z-20 border-b bg-background/90 px-3 py-3 backdrop-blur md:px-4">
+      <div className="flex flex-wrap items-center gap-3 sm:flex-nowrap">
+        {mobileNavTrigger}
+
+        <div className="relative min-w-0 max-w-xl flex-1">
           <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input placeholder="Busca global: lead, condomínio, OS" className="pl-8" value={q} onChange={(e) => setQ(e.target.value)} />
           {q.length > 1 && (
-            <div className="absolute mt-1 max-h-72 w-full overflow-auto rounded-xl border bg-card p-2 shadow-soft">
+            <div className="absolute left-0 right-0 mt-1 max-h-72 overflow-auto rounded-xl border bg-card p-2 shadow-soft">
               <p className="mb-1 text-xs text-muted-foreground">Resultados</p>
               {(results?.leads ?? []).map((item: { id: string; name: string }) => <div key={item.id} className="rounded-md px-2 py-1 text-sm hover:bg-muted">Lead: {item.name}</div>)}
               {(results?.condos ?? []).map((item: { id: string; name: string }) => <div key={item.id} className="rounded-md px-2 py-1 text-sm hover:bg-muted">Condomínio: {item.name}</div>)}
@@ -62,9 +64,9 @@ export function Topbar() {
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="outline" size="sm" className="gap-2">
+            <Button variant="outline" size="sm" className="max-w-full gap-2">
               <UserCircle className="h-4 w-4" />
-              {profile?.full_name ?? 'Usuário'}
+              <span className="truncate">{profile?.full_name ?? 'Usuário'}</span>
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">

@@ -230,7 +230,7 @@ export function FinanceiroPage() {
                     <TableCell>{currency.format(Number(row.amount ?? 0))}</TableCell>
                     <TableCell>
                       <Select value={row.status} onValueChange={(v) => updateMutation.mutate({ id: row.id, payload: { status: v } })}>
-                        <SelectTrigger className="h-8 w-[130px]"><SelectValue /></SelectTrigger>
+                        <SelectTrigger className="h-8 w-full sm:w-[130px]"><SelectValue /></SelectTrigger>
                         <SelectContent>
                           <SelectItem value="aberto">aberto</SelectItem>
                           <SelectItem value="pago">pago</SelectItem>

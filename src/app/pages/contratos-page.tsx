@@ -179,7 +179,7 @@ export function ContratosPage() {
                       ))}
                     </SelectContent>
                   </Select>
-                  <div className="grid grid-cols-2 gap-2">
+                  <div className="grid gap-2 sm:grid-cols-2">
                     <Input type="date" {...form.register('start_date')} />
                     <Select defaultValue="pendente" onValueChange={(v) => form.setValue('status', v as FormValues['status'])}>
                       <SelectTrigger><SelectValue /></SelectTrigger>
@@ -190,7 +190,7 @@ export function ContratosPage() {
                       </SelectContent>
                     </Select>
                   </div>
-                  <div className="grid grid-cols-2 gap-2">
+                  <div className="grid gap-2 sm:grid-cols-2">
                     <Input type="number" placeholder="MRR" {...form.register('mrr', { valueAsNumber: true })} />
                     <Input type="number" placeholder="Reajuste %" {...form.register('reajuste_percent', { valueAsNumber: true })} />
                   </div>
@@ -263,7 +263,7 @@ export function ContratosPage() {
                         value={contract.status}
                         onValueChange={(v) => statusMutation.mutate({ id: contract.id, status: v as 'ativo' | 'pendente' | 'cancelado' })}
                       >
-                        <SelectTrigger className="h-8 w-[130px]"><SelectValue /></SelectTrigger>
+                        <SelectTrigger className="h-8 w-full sm:w-[130px]"><SelectValue /></SelectTrigger>
                         <SelectContent>
                           <SelectItem value="ativo">ativo</SelectItem>
                           <SelectItem value="pendente">pendente</SelectItem>

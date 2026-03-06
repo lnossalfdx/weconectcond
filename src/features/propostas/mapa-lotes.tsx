@@ -1,6 +1,7 @@
-import { useEffect, useMemo, useRef, useState, type MouseEvent } from 'react';
+import { useEffect, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react';
 import { AlertTriangle } from 'lucide-react';
 import type { SelectedLot } from './proposal-engine';
+import { useIsMobile } from '@/lib/use-is-mobile';
 
 type ViewState = { scale: number; offsetX: number; offsetY: number };
 type LotMeta = { id: number; nome: string; area: number; preco: number; status: SelectedLot['status'] };
@@ -16,8 +17,31 @@ const AREA_PER_PIXEL = 0.42;
 const PRICE_PER_M2 = 860;
 const MIN_PIXELS = 80;
 const MAX_PIXELS = 9000;
+const MIN_SCALE = 0.2;
+const MAX_SCALE = 8;
 
 const formatNumber = (value: number) => Math.round(value * 100) / 100;
+
+function constrainView(nextView: ViewState, wrap: HTMLDivElement | null, image: HTMLImageElement | null) {
+  if (!wrap || !image) return nextView;
+
+  const rect = wrap.getBoundingClientRect();
+  const scaledWidth = image.naturalWidth * nextView.scale;
+  const scaledHeight = image.naturalHeight * nextView.scale;
+  const marginX = Math.min(rect.width * 0.18, 64);
+  const marginY = Math.min(rect.height * 0.18, 64);
+
+  const minOffsetX = Math.min(marginX, rect.width - scaledWidth - marginX);
+  const maxOffsetX = Math.max(rect.width - marginX - scaledWidth, marginX);
+  const minOffsetY = Math.min(marginY, rect.height - scaledHeight - marginY);
+  const maxOffsetY = Math.max(rect.height - marginY - scaledHeight, marginY);
+
+  return {
+    scale: nextView.scale,
+    offsetX: Math.min(maxOffsetX, Math.max(minOffsetX, nextView.offsetX)),
+    offsetY: Math.min(maxOffsetY, Math.max(minOffsetY, nextView.offsetY)),
+  };
+}
 
 function loadImageWithFallback(srcList: string[]) {
   return new Promise<{ image: HTMLImageElement; src: string }>((resolve, reject) => {
@@ -204,11 +228,14 @@ export function MapaLotes({
   selectedLot,
   onSelect,
 }: Props) {
+  const isMobile = useIsMobile();
   const wrapRef = useRef<HTMLDivElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [view, setView] = useState<ViewState>({ scale: 1, offsetX: 0, offsetY: 0 });
   const [isDragging, setIsDragging] = useState(false);
-  const dragRef = useRef<{ x: number; y: number } | null>(null);
+  const dragRef = useRef<{ pointerId: number; x: number; y: number; moved: boolean } | null>(null);
+  const pointersRef = useRef(new Map<number, { x: number; y: number }>());
+  const pinchRef = useRef<{ distance: number; centerX: number; centerY: number; startView: ViewState } | null>(null);
 
   const [baseImage, setBaseImage] = useState<HTMLImageElement | null>(null);
   const [maskData, setMaskData] = useState<ImageData | null>(null);
@@ -316,7 +343,7 @@ export function MapaLotes({
       if (!baseImage || !wrapRef.current) return;
       const rect = wrapRef.current.getBoundingClientRect();
       const fit = Math.min(rect.width / baseImage.naturalWidth, rect.height / baseImage.naturalHeight);
-      setView((prev) => ({ ...prev, scale: Math.max(prev.scale, fit) }));
+      setView((prev) => constrainView({ ...prev, scale: Math.max(prev.scale, fit) }, wrapRef.current, baseImage));
     };
     window.addEventListener('resize', onResize);
     return () => window.removeEventListener('resize', onResize);
@@ -352,9 +379,8 @@ export function MapaLotes({
     return null;
   };
 
-  const onClickCanvas = (event: MouseEvent<HTMLCanvasElement>) => {
-    if (isDragging) return;
-    const label = pickLot(event.clientX, event.clientY);
+  const selectAtPoint = (clientX: number, clientY: number) => {
+    const label = pickLot(clientX, clientY);
     if (!label) {
       onSelect(null);
       return;
@@ -370,27 +396,15 @@ export function MapaLotes({
     });
   };
 
-  const onMouseDown = (event: MouseEvent<HTMLCanvasElement>) => {
-    dragRef.current = { x: event.clientX, y: event.clientY };
-    setIsDragging(false);
-  };
-
-  const onMouseMove = (event: MouseEvent<HTMLCanvasElement>) => {
-    if (!dragRef.current) return;
-    const dx = event.clientX - dragRef.current.x;
-    const dy = event.clientY - dragRef.current.y;
-    if (!isDragging && Math.hypot(dx, dy) > 4) setIsDragging(true);
-    setView((prev) => ({ ...prev, offsetX: prev.offsetX + dx, offsetY: prev.offsetY + dy }));
-    dragRef.current = { x: event.clientX, y: event.clientY };
-  };
-
-  const onMouseUp = () => {
-    dragRef.current = null;
-    setTimeout(() => setIsDragging(false), 0);
+  const getPointerDistance = () => {
+    const pointers = Array.from(pointersRef.current.values());
+    if (pointers.length < 2) return null;
+    const [a, b] = pointers;
+    return Math.hypot(b.x - a.x, b.y - a.y);
   };
 
   const zoom = (multiplier: number) => {
-    setView((prev) => ({ ...prev, scale: Math.min(8, Math.max(0.2, prev.scale * multiplier)) }));
+    setView((prev) => constrainView({ ...prev, scale: Math.min(MAX_SCALE, Math.max(MIN_SCALE, prev.scale * multiplier)) }, wrapRef.current, baseImage));
   };
 
   const resetView = () => {
@@ -406,6 +420,107 @@ export function MapaLotes({
     });
   };
 
+  const beginPinch = () => {
+    const pointers = Array.from(pointersRef.current.values());
+    if (pointers.length < 2) return;
+    const [a, b] = pointers;
+    pinchRef.current = {
+      distance: Math.max(1, Math.hypot(b.x - a.x, b.y - a.y)),
+      centerX: (a.x + b.x) / 2,
+      centerY: (a.y + b.y) / 2,
+      startView: view,
+    };
+    dragRef.current = null;
+    setIsDragging(true);
+  };
+
+  const onPointerDown = (event: ReactPointerEvent<HTMLCanvasElement>) => {
+    const canvas = canvasRef.current;
+    canvas?.setPointerCapture(event.pointerId);
+    pointersRef.current.set(event.pointerId, { x: event.clientX, y: event.clientY });
+
+    if (pointersRef.current.size === 1) {
+      dragRef.current = { pointerId: event.pointerId, x: event.clientX, y: event.clientY, moved: false };
+      pinchRef.current = null;
+      setIsDragging(false);
+      return;
+    }
+
+    if (pointersRef.current.size === 2) {
+      beginPinch();
+    }
+  };
+
+  const onPointerMove = (event: ReactPointerEvent<HTMLCanvasElement>) => {
+    if (!pointersRef.current.has(event.pointerId)) return;
+    pointersRef.current.set(event.pointerId, { x: event.clientX, y: event.clientY });
+
+    if (pointersRef.current.size >= 2) {
+      const currentPinch = pinchRef.current;
+      const currentDistance = getPointerDistance();
+      if (!currentPinch || !currentDistance || !baseImage || !wrapRef.current) return;
+
+      const nextScale = Math.min(MAX_SCALE, Math.max(MIN_SCALE, (currentPinch.startView.scale * currentDistance) / currentPinch.distance));
+      const centerX = currentPinch.centerX;
+      const centerY = currentPinch.centerY;
+      const mapX = (centerX - currentPinch.startView.offsetX) / currentPinch.startView.scale;
+      const mapY = (centerY - currentPinch.startView.offsetY) / currentPinch.startView.scale;
+
+      setView(
+        constrainView(
+          {
+            scale: nextScale,
+            offsetX: centerX - mapX * nextScale,
+            offsetY: centerY - mapY * nextScale,
+          },
+          wrapRef.current,
+          baseImage,
+        ),
+      );
+      return;
+    }
+
+    if (!dragRef.current || dragRef.current.pointerId !== event.pointerId) return;
+
+    const dx = event.clientX - dragRef.current.x;
+    const dy = event.clientY - dragRef.current.y;
+    const moved = dragRef.current.moved || Math.hypot(dx, dy) > 4;
+    if (moved) setIsDragging(true);
+    setView((prev) => constrainView({ ...prev, offsetX: prev.offsetX + dx, offsetY: prev.offsetY + dy }, wrapRef.current, baseImage));
+    dragRef.current = { pointerId: event.pointerId, x: event.clientX, y: event.clientY, moved };
+  };
+
+  const finishPointer = (event: ReactPointerEvent<HTMLCanvasElement>) => {
+    const canvas = canvasRef.current;
+    if (canvas?.hasPointerCapture(event.pointerId)) {
+      canvas.releasePointerCapture(event.pointerId);
+    }
+
+    const wasTap = dragRef.current?.pointerId === event.pointerId && !dragRef.current.moved && pointersRef.current.size === 1;
+    pointersRef.current.delete(event.pointerId);
+
+    if (wasTap) {
+      selectAtPoint(event.clientX, event.clientY);
+    }
+
+    if (pointersRef.current.size >= 2) {
+      beginPinch();
+      return;
+    }
+
+    if (pointersRef.current.size === 1) {
+      const [pointerId, point] = Array.from(pointersRef.current.entries())[0];
+      dragRef.current = { pointerId, x: point.x, y: point.y, moved: false };
+      pinchRef.current = null;
+      setTimeout(() => setIsDragging(false), 0);
+      return;
+    }
+
+    dragRef.current = null;
+    pinchRef.current = null;
+    setTimeout(() => setIsDragging(false), 0);
+  };
+
   return (
     <div className="grid gap-3 xl:grid-cols-[0.78fr_0.22fr]">
       <div className="rounded-2xl border bg-gradient-to-br from-slate-100 via-slate-50 to-white p-3 shadow-sm">
@@ -416,44 +531,48 @@ export function MapaLotes({
           <canvas
             ref={canvasRef}
             aria-label="Mapa interativo de lotes"
-            className={`h-full w-full ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}`}
-            onMouseDown={onMouseDown}
-            onMouseMove={onMouseMove}
-            onMouseUp={onMouseUp}
-            onMouseLeave={onMouseUp}
-            onClick={onClickCanvas}
+            className={`h-full w-full touch-none select-none ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}`}
+            onPointerDown={onPointerDown}
+            onPointerMove={onPointerMove}
+            onPointerUp={finishPointer}
+            onPointerCancel={finishPointer}
+            onPointerLeave={(event) => {
+              if (event.pointerType === 'mouse') finishPointer(event);
+            }}
           />
 
           <div className="absolute left-3 top-3 rounded-lg border border-slate-300/70 bg-white/85 px-3 py-1.5 text-[11px] font-medium text-slate-600 shadow-sm backdrop-blur">
-            Clique no lote para selecionar
+            Arraste com 1 dedo e use 2 dedos para zoom
           </div>
 
-          <div className="absolute right-3 top-1/2 flex w-[126px] -translate-y-1/2 flex-col gap-2">
-            <button
-              aria-label="Zoom in"
-              className="rounded-xl border border-slate-300/80 bg-white/90 px-3 py-2 text-sm font-semibold text-slate-700 shadow-sm backdrop-blur transition hover:bg-white"
-              type="button"
-              onClick={() => zoom(1.2)}
-            >
-              +
-            </button>
-            <button
-              aria-label="Centralizar mapa"
-              className="rounded-xl border border-slate-300/80 bg-white/90 px-3 py-2 text-sm font-semibold text-slate-700 shadow-sm backdrop-blur transition hover:bg-white"
-              type="button"
-              onClick={resetView}
-            >
-              ⟳ Centralizar
-            </button>
-            <button
-              aria-label="Zoom out"
-              className="rounded-xl border border-slate-300/80 bg-white/90 px-3 py-2 text-sm font-semibold text-slate-700 shadow-sm backdrop-blur transition hover:bg-white"
-              type="button"
-              onClick={() => zoom(1 / 1.2)}
-            >
-              −
-            </button>
-          </div>
+          {!isMobile && (
+            <div className="absolute right-3 top-1/2 flex w-[126px] -translate-y-1/2 flex-col gap-2">
+              <button
+                aria-label="Zoom in"
+                className="rounded-xl border border-slate-300/80 bg-white/90 px-3 py-2 text-sm font-semibold text-slate-700 shadow-sm backdrop-blur transition hover:bg-white"
+                type="button"
+                onClick={() => zoom(1.2)}
+              >
+                +
+              </button>
+              <button
+                aria-label="Centralizar mapa"
+                className="rounded-xl border border-slate-300/80 bg-white/90 px-3 py-2 text-sm font-semibold text-slate-700 shadow-sm backdrop-blur transition hover:bg-white"
+                type="button"
+                onClick={resetView}
+              >
+                ⟳ Centralizar
+              </button>
+              <button
+                aria-label="Zoom out"
+                className="rounded-xl border border-slate-300/80 bg-white/90 px-3 py-2 text-sm font-semibold text-slate-700 shadow-sm backdrop-blur transition hover:bg-white"
+                type="button"
+                onClick={() => zoom(1 / 1.2)}
+              >
+                −
+              </button>
+            </div>
+          )}
 
           {loading && (
             <div className="absolute inset-0 flex items-center justify-center bg-background/85 backdrop-blur-sm">

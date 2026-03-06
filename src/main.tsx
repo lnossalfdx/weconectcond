@@ -5,6 +5,7 @@ import { QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from 'sonner';
 import App from '@/app/app';
 import '@/index.css';
+import '@/mobile.css';
 import { queryClient } from '@/lib/queryClient';
 import { AuthProvider } from '@/features/auth/auth-context';
 

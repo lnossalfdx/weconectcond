@@ -1,0 +1,59 @@
+html[data-device='mobile'] body {
+  overflow-x: hidden;
+  font-size: 14px;
+}
+
+html[data-device='mobile'] #root {
+  min-height: 100vh;
+}
+
+html[data-device='mobile'] .crm-page-content {
+  padding: 0.75rem;
+}
+
+html[data-device='mobile'] .crm-page-header-actions,
+html[data-device='mobile'] .crm-page-header-actions > * {
+  width: 100%;
+}
+
+html[data-device='mobile'] .crm-table-container {
+  -webkit-overflow-scrolling: touch;
+}
+
+html[data-device='mobile'] table.crm-table-zebra {
+  min-width: 720px;
+}
+
+html[data-device='mobile'] .crm-dialog-content {
+  width: calc(100vw - 1rem);
+  max-width: none;
+  max-height: calc(100vh - 1rem);
+  overflow-y: auto;
+  padding: 1rem;
+  border-radius: 1rem;
+}
+
+html[data-device='mobile'] .crm-sheet-content {
+  max-width: 100vw;
+  padding: 1rem;
+}
+
+html[data-device='mobile'] .crm-mobile-nav {
+  width: min(88vw, 360px);
+  max-width: min(88vw, 360px);
+  padding: 0;
+  border-color: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 30px 80px rgba(2, 6, 23, 0.6);
+}
+
+html[data-device='mobile'] .crm-tabs-list {
+  display: grid;
+  width: 100%;
+  height: auto;
+  grid-template-columns: 1fr;
+  gap: 0.5rem;
+}
+
+html[data-device='mobile'] .crm-tabs-list > * {
+  width: 100%;
+}

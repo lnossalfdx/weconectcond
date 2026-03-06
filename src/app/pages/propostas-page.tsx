@@ -360,7 +360,7 @@ export function PropostasPage() {
                       <TableCell>
                         {canWrite ? (
                           <Select value={p.status} onValueChange={(status) => updateStatusMutation.mutate({ id: p.id, status: status as any })}>
-                            <SelectTrigger className="h-8 w-[160px]"><SelectValue /></SelectTrigger>
+                            <SelectTrigger className="h-8 w-full sm:w-[160px]"><SelectValue /></SelectTrigger>
                             <SelectContent>
                               <SelectItem value="rascunho">Rascunho</SelectItem>
                               <SelectItem value="enviada">Enviada</SelectItem>

@@ -175,7 +175,7 @@ export function OsPage() {
                   <SelectContent>{condoQuery.data?.map((c: any) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}</SelectContent>
                 </Select>
                 <Input placeholder="Categoria" value={category} onChange={(e) => setCategory(e.target.value)} />
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid gap-2 sm:grid-cols-2">
                   <Select value={priority} onValueChange={(v) => setPriority(v as 'baixa' | 'media' | 'alta' | 'critica')}>
                     <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent>{PRIORITIES.map((p) => <SelectItem key={p} value={p}>{p}</SelectItem>)}</SelectContent>
@@ -264,7 +264,7 @@ export function OsPage() {
                       <TableCell>
                         {canWrite ? (
                           <Select value={row.status} onValueChange={(v) => updateMutation.mutate({ id: row.id, payload: { status: v } })}>
-                            <SelectTrigger className="h-8 w-[140px]"><SelectValue /></SelectTrigger>
+                            <SelectTrigger className="h-8 w-full sm:w-[140px]"><SelectValue /></SelectTrigger>
                             <SelectContent>{STATUSES.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
                           </Select>
                         ) : (
@@ -274,7 +274,7 @@ export function OsPage() {
                       <TableCell>
                         {canWrite ? (
                           <Select value={row.priority} onValueChange={(v) => updateMutation.mutate({ id: row.id, payload: { priority: v } })}>
-                            <SelectTrigger className="h-8 w-[130px]"><SelectValue /></SelectTrigger>
+                            <SelectTrigger className="h-8 w-full sm:w-[130px]"><SelectValue /></SelectTrigger>
                             <SelectContent>{PRIORITIES.map((p) => <SelectItem key={p} value={p}>{p}</SelectItem>)}</SelectContent>
                           </Select>
                         ) : (
@@ -293,7 +293,7 @@ export function OsPage() {
                             value={row.assigned_to ?? NO_ASSIGNEE}
                             onValueChange={(v) => updateMutation.mutate({ id: row.id, payload: { assigned_to: v === NO_ASSIGNEE ? null : v } })}
                           >
-                            <SelectTrigger className="h-8 w-[170px]"><SelectValue placeholder="Responsável" /></SelectTrigger>
+                            <SelectTrigger className="h-8 w-full sm:w-[170px]"><SelectValue placeholder="Responsável" /></SelectTrigger>
                             <SelectContent>
                               <SelectItem value={NO_ASSIGNEE}>Sem responsável</SelectItem>
                               {(usersQuery.data ?? []).map((u) => <SelectItem key={u.user_id} value={u.user_id}>{u.full_name}</SelectItem>)}
@@ -328,7 +328,7 @@ export function OsPage() {
                 <div className="rounded-xl border p-3 text-sm">
                   <p className="font-semibold">{selectedOs.category}</p>
                   <p className="text-xs text-muted-foreground">{selectedOs.description}</p>
-                  <div className="mt-2 grid grid-cols-2 gap-2 text-xs">
+                  <div className="mt-2 grid gap-2 text-xs sm:grid-cols-2">
                     <div className="rounded-md border p-2">Condomínio<br /><strong>{selectedOs.condominiums?.name ?? '-'}</strong></div>
                     <div className="rounded-md border p-2">Custo<br /><strong>{currency.format(Number(selectedOs.cost ?? 0))}</strong></div>
                     <div className="rounded-md border p-2">Prioridade<br /><strong>{selectedOs.priority}</strong></div>
